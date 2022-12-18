@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: com.mcspeedrun.rng
+testFramework: junit
+sourceLanguage: kotlin
+buildTool: gradle
+features: [annotation-api, app-name, google-cloud-function, google-cloud-function-http, gradle, h2, jackson-databind, jdbc-hikari, jooq, junit, kotlin, kotlin-application, kotlin-build, logback, micronaut-build, mockito, readme, shade, yaml]
