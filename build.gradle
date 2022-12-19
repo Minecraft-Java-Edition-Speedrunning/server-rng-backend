@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "1.6.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.6.3"
+    id("org.flywaydb.flyway") version "8.2.0"
+    id 'nu.studer.jooq' version '8.0'
 }
 
 version = "0.1"
@@ -13,10 +15,19 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    flywayMigration
+}
+
 dependencies {
     implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut.flyway:micronaut-flyway")
+    implementation("org.flywaydb:flyway-mysql")
     implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
+    implementation("io.micronaut.reactor:micronaut-reactor")
+    implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+    implementation('mysql:mysql-connector-java:8.0.11')
     implementation("io.micronaut.sql:micronaut-jooq")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -30,8 +41,58 @@ dependencies {
 
     testImplementation("io.micronaut:micronaut-http-client")
 
+    jooqGenerator 'mysql:mysql-connector-java:8.0.11'
 }
 
+flyway {
+    url = "jdbc:mysql://localhost:3306/server-rng"
+    user = "root"
+    password = "password"
+}
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                logging = org.jooq.meta.jaxb.Logging.WARN
+                jdbc {
+                    driver = 'com.mysql.cj.jdbc.Driver'
+                    url = flyway.url
+                    user = flyway.user
+                    password = flyway.password
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        includes = '.*'
+                        excludes = 'flyway_schema_history'
+                    }
+                    target {
+                        packageName = 'database.generated'
+                    }
+                }
+            }
+        }
+    }
+}
+
+// configure jOOQ task such that it only executes when something has changed that potentially affects the generated JOOQ sources
+// - the jOOQ configuration has changed (Jdbc, Generator, Strategy, etc.)
+// - the classpath used to execute the jOOQ generation tool has changed (jOOQ library, database driver, strategy classes, etc.)
+// - the schema files from which the schema is generated and which is used by jOOQ to generate the sources have changed (scripts added, modified, etc.)
+tasks.named('generateJooq').configure {
+    // ensure database schema has been prepared by Flyway before generating the jOOQ sources
+    dependsOn tasks.named('flywayMigrate')
+
+    // declare Flyway migration scripts as inputs on the jOOQ task
+    inputs.files(fileTree('src/main/resources/db/migration'))
+            .withPropertyName('migrations')
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    // make jOOQ task participate in incremental builds (and build caching)
+    allInputsDeclared = true
+}
 
 application {
     mainClass.set("com.mcspeedrun.rng.ApplicationKt")
@@ -52,7 +113,9 @@ tasks {
         }
     }
 }
+
 graalvmNative.toolchainDetection = false
+
 micronaut {
     runtime("google_function")
     testRuntime("junit5")
@@ -61,6 +124,3 @@ micronaut {
         annotations("com.mcspeedrun.rng.*")
     }
 }
-
-
-
