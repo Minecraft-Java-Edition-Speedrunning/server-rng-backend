@@ -1,30 +1,17 @@
 package com.mcspeedrun.rng
 
 import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
-import io.micronaut.http.annotation.Body
-import io.micronaut.http.annotation.Produces
-import io.micronaut.http.MediaType
-import io.micronaut.core.annotation.Introspected
+import io.micronaut.security.annotation.Secured
+import io.micronaut.security.rules.SecurityRule
+import java.security.Principal
 
-@Controller("/serverRngBackend")
+@Secured(SecurityRule.IS_AUTHENTICATED)
+@Controller("/api/v2")
+@Suppress("Unused")
 class ServerRngBackendController {
-
-    @Produces(MediaType.TEXT_PLAIN)
-    @Get
-    fun index(): String {
-        return "Example Response"
-    }
-
     @Post
-    fun post(@Body inputMessage: SampleInputMessage): SampleReturnMessage {
-        return SampleReturnMessage("Hello ${inputMessage.name}, thank you for sending the message")
+    fun test(principal: Principal) {
+        println(principal.name)
     }
 }
-
-@Introspected
-data class SampleInputMessage(val name: String)
-
-@Introspected
-data class SampleReturnMessage(val returnMessage: String)
