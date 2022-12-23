@@ -1,9 +1,12 @@
 micronaut:
   application:
     name: serverRngBackend
+    credentialLimit: 20
+    sourceUsageLimit: 100
+    saltHashAlg: SHA-256
+    saltLifetime: 3600000
   security:
     authentication: bearer
-    credentialLimit: 20
     token:
       jwt:
         generator:

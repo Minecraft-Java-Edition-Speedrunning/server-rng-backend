@@ -19,7 +19,7 @@ import java.util.*
 
 @Singleton
 class AuthenticationService(
-    @Property(name = "\${micronaut.security.credentialLimit}", defaultValue = "20")
+    @Property(name = "\${micronaut.application.credentialLimit}", defaultValue = "20")
     private val credentialLimit: Int,
     private val repository: RegisteredInstancesRepository,
     private var tokenGenerator: AccessRefreshTokenGenerator,
