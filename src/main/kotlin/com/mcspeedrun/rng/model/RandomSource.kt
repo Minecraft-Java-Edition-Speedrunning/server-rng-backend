@@ -1,14 +1,17 @@
 package com.mcspeedrun.rng.model
 
+import java.security.SecureRandom
 import java.time.LocalDateTime
-import kotlin.random.Random
+import java.util.*
 
-data class RandomSource(
+private val decoder = Base64.getDecoder()
+
+data class RandomSource (
     val sourceId: String,
     private val seed: String,
     val expiresAt: LocalDateTime,
     val createdAt: LocalDateTime,
 ) {
     var uses: Int = 0
-    var source: Random = TODO("replace with random from seed")
+    var source: SecureRandom = SecureRandom.getInstance("SHA1PRNG").also{ it.setSeed(decoder.decode(seed)) }
 }

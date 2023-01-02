@@ -15,6 +15,7 @@ import io.micronaut.security.token.jwt.render.AccessRefreshToken
 import io.micronaut.security.token.validator.RefreshTokenValidator
 import jakarta.inject.Singleton
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 @Singleton
@@ -35,7 +36,7 @@ class AuthenticationService(
     private fun getUserIdentifier(method: AuthenticationMethod, userId: String): Long {
         return repository.getUserIdentifier(method, userId)?.also { identifier ->
             val registeredInstances = repository.getRegisteredInstances(identifier)
-            val rateCutoff = LocalDateTime.now().minusHours(1)
+            val rateCutoff = LocalDateTime.now(ZoneOffset.UTC).minusHours(1)
             val recentlyRegistered = registeredInstances.filter { it.createdAt.isAfter(rateCutoff) }
             if (recentlyRegistered.size > credentialLimit) {
                 throw http429("exceeded maximum login requests of $credentialLimit/hr")

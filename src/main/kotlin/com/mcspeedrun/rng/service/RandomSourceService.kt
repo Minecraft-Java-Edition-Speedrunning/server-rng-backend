@@ -8,6 +8,7 @@ import jakarta.inject.Singleton
 import java.security.SecureRandom
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.Base64
 
@@ -34,7 +35,7 @@ class RandomSourceService (
     private fun getSource(): RandomSource {
         return source
             ?.takeIf { it.uses < sourceUsageLimit }
-            ?.takeIf { it.expiresAt.isBefore(LocalDateTime.now()) }
+            ?.takeIf { it.expiresAt.isBefore(LocalDateTime.now(ZoneOffset.UTC)) }
             ?: repository.createSource(generateSeed(), duration)
                 .also {
                     source = it
@@ -46,8 +47,8 @@ class RandomSourceService (
 
         return RunRandomSource(
             source.sourceId,
-            String(encoder.encode(source.source.nextBytes(36))),
-            String(encoder.encode(source.source.nextBytes(36))),
+            String(encoder.encode(ByteArray(36).also { source.source.nextBytes(it) })),
+            String(encoder.encode(ByteArray(36).also { source.source.nextBytes(it) })),
         )
     }
 }

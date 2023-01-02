@@ -10,6 +10,7 @@ import database.generated.server_rng.Tables.REGISTERED_ROLES
 import jakarta.inject.Singleton
 import org.jooq.DSLContext
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 val INSTANCE_USERS = USERS
     .join(REGISTERED_INSTANCES)
@@ -64,7 +65,7 @@ class RegisteredInstancesRepository(
     fun refreshInstance(instanceId: String) {
         jooq
             .update(REGISTERED_INSTANCES)
-            .set(REGISTERED_INSTANCES.REFRESHED_AT, LocalDateTime.now())
+            .set(REGISTERED_INSTANCES.REFRESHED_AT, LocalDateTime.now(ZoneOffset.UTC))
             .where(REGISTERED_INSTANCES.ID.eq(instanceId))
             .execute()
     }
