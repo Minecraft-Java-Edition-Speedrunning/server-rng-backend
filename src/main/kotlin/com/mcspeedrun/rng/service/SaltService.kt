@@ -1,30 +1,22 @@
 package com.mcspeedrun.rng.service
 
+import com.mcspeedrun.rng.repository.SaltBlockRepository
 import io.micronaut.context.annotation.Property
 import jakarta.inject.Singleton
 import java.security.MessageDigest
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
-
-/**
- * salt table should contain the following rows
- * saltId: UUID - primary key
- * salt: String - random data that for the salt
- * openedAt: Instant - time the salt was opened
- * closedAt: Instant - time the salt was closed
- */
 
 @Singleton
 class SaltService (
     @Property(name = "\${micronaut.application.saltHashAlg}", defaultValue = "SHA-256")
-    val saltHashAlg: String,
-    @Property(name = "\${micronaut.application.saltLifetime}", defaultValue = "3600000")
-    val saltTTL: Long,
+    private val saltHashAlg: String,
+    private val repository: SaltBlockRepository,
 ) {
-    // TODO("salt cache from db")
-    // TODO("generate salt on chron job")
-    private fun getSalt(saltTime: Instant): Long {
-        TODO("get the active salt at the time from cache or db$saltTime")
+    private fun getSalt(saltTime: Instant): ByteArray {
+        return repository.findSalt(LocalDateTime.ofInstant(saltTime, ZoneOffset.UTC))
     }
 
     fun getHashAlg(): String {
@@ -34,7 +26,7 @@ class SaltService (
     fun getBlockSeed(blockStartTime: Instant, runSalt: String, block: Int): String {
         val globalSalt = getSalt(blockStartTime)
         val digest = MessageDigest.getInstance(saltHashAlg)
-        digest.update(globalSalt.toByte())
+        digest.update(globalSalt)
         digest.update(runSalt.toByte())
         digest.update(block.toByte())
 
