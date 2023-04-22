@@ -1,8 +1,8 @@
 package com.mcspeedrun.rng.controller
 
-import com.mcspeedrun.rng.model.RandomSourceEntry
+import com.mcspeedrun.rng.model.validation.RandomSourceEntry
 import com.mcspeedrun.rng.repository.SaltBlockRepository
-import com.mcspeedrun.rng.model.SaltBlockEntry
+import com.mcspeedrun.rng.model.validation.SaltBlockEntry
 import com.mcspeedrun.rng.repository.RandomSourceRepository
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get

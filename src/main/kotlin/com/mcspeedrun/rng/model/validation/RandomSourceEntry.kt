@@ -1,4 +1,4 @@
-package com.mcspeedrun.rng.model
+package com.mcspeedrun.rng.model.validation
 
 import java.time.LocalDateTime
 

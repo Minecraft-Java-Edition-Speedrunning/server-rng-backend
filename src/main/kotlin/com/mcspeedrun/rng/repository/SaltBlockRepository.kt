@@ -1,6 +1,6 @@
 package com.mcspeedrun.rng.repository
 
-import com.mcspeedrun.rng.model.SaltBlockEntry
+import com.mcspeedrun.rng.model.validation.SaltBlockEntry
 import com.mcspeedrun.rng.model.http.http425
 import database.generated.server_rng.Tables.SALT_BLOCK
 import io.micronaut.context.annotation.Property

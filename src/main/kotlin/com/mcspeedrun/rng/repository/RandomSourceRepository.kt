@@ -1,7 +1,7 @@
 package com.mcspeedrun.rng.repository
 
 import com.mcspeedrun.rng.model.RandomSource
-import com.mcspeedrun.rng.model.RandomSourceEntry
+import com.mcspeedrun.rng.model.validation.RandomSourceEntry
 import com.mcspeedrun.rng.model.http.http425
 import database.generated.server_rng.Tables.RANDOM_SOURCE
 import jakarta.inject.Singleton
