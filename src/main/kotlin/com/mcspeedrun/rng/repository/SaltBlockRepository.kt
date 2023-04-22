@@ -1,5 +1,6 @@
 package com.mcspeedrun.rng.repository
 
+import com.mcspeedrun.rng.model.http.http425
 import database.generated.server_rng.Tables.SALT_BLOCK
 import io.micronaut.context.annotation.Property
 import jakarta.inject.Singleton
@@ -21,18 +22,45 @@ private fun LocalDateTime.toEpochMilli(offset: ZoneOffset): Long {
     return this.toInstant(offset).toEpochMilli()
 }
 
+data class SaltEntry (
+    val id: String,
+    val salt: String,
+    val activeAt: LocalDateTime,
+    val expiresAt: LocalDateTime,
+    val createdAt: LocalDateTime,
+)
+
 @Singleton
 class SaltBlockRepository (
     @Property(name = "\${micronaut.application.saltLifetime}", defaultValue = "3600000")
     private val saltTTL: Long,
     private val jooq: DSLContext,
 ) {
+    fun findExpiredSalt(time: LocalDateTime): SaltEntry? {
+        val now = LocalDateTime.now()
+        if (time.isBefore(now)) {
+            throw http425("can't read archived block from the future")
+        }
+        return jooq
+            .select(
+                SALT_BLOCK.ID,
+                SALT_BLOCK.SALT,
+                SALT_BLOCK.ACTIVE_AT,
+                SALT_BLOCK.EXPIRES_AT,
+                SALT_BLOCK.CREATED_AT,
+            )
+            .from(SALT_BLOCK)
+            .where(SALT_BLOCK.EXPIRES_AT.lessThan(now))
+            .and(DSL.value(time).between(SALT_BLOCK.EXPIRES_AT, SALT_BLOCK.ACTIVE_AT))
+            .fetchOneInto(SaltEntry::class.java)
+    }
+
     fun findSalt(time: LocalDateTime): ByteArray {
         return jooq.transactionResult { transaction ->
             transaction.dsl()
                 .select(SALT_BLOCK.SALT)
                 .from(SALT_BLOCK)
-                .where(DSL.value(time).between(SALT_BLOCK.EXPIRES_AT, SALT_BLOCK.CREATED_AT))
+                .where(DSL.value(time).between(SALT_BLOCK.EXPIRES_AT, SALT_BLOCK.ACTIVE_AT))
                 .fetchOne()
                 ?.component1()
                 ?.let { decoder.decode(it) }?: createSalt(transaction, time)
@@ -43,15 +71,15 @@ class SaltBlockRepository (
         val lastBlockEnd = transaction.dsl()
             .select(SALT_BLOCK.EXPIRES_AT)
             .from(SALT_BLOCK)
-            .where(SALT_BLOCK.CREATED_AT.lessThan(time))
-            .orderBy(SALT_BLOCK.CREATED_AT.desc())
+            .where(SALT_BLOCK.ACTIVE_AT.lessThan(time))
+            .orderBy(SALT_BLOCK.ACTIVE_AT.desc())
             .fetchOne()
             ?.component1()
         val nextBlockStart = transaction.dsl()
-            .select(SALT_BLOCK.CREATED_AT)
+            .select(SALT_BLOCK.ACTIVE_AT)
             .from(SALT_BLOCK)
             .where(SALT_BLOCK.EXPIRES_AT.greaterThan(time))
-            .orderBy(SALT_BLOCK.CREATED_AT.asc())
+            .orderBy(SALT_BLOCK.ACTIVE_AT.asc())
             .fetchOne()
             ?.component1()
 
@@ -73,12 +101,20 @@ class SaltBlockRepository (
         val salt = ByteArray(36).also { saltSource.nextBytes(it) }
 
         transaction.dsl()
-            .insertInto(SALT_BLOCK, SALT_BLOCK.ID, SALT_BLOCK.SALT, SALT_BLOCK.CREATED_AT, SALT_BLOCK.EXPIRES_AT)
+            .insertInto(
+                SALT_BLOCK,
+                SALT_BLOCK.ID,
+                SALT_BLOCK.SALT,
+                SALT_BLOCK.ACTIVE_AT,
+                SALT_BLOCK.EXPIRES_AT,
+                SALT_BLOCK.CREATED_AT
+            )
             .values(
                 UUID.randomUUID().toString(),
                 String(encoder.encode(salt)),
                 blockStart,
                 blockEnd,
+                LocalDateTime.now(),
             )
             .execute()
 
