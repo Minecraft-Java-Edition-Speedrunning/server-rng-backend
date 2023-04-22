@@ -92,4 +92,8 @@ class RegisteredInstancesRepository(
         val roleInsert = jooq.insertInto(REGISTERED_ROLES, REGISTERED_ROLES.INSTANCE_ID, REGISTERED_ROLES.ROLE)
         roles.fold(roleInsert) { insertStep, role -> insertStep.values(uuid, role.id) }.execute()
     }
+
+    fun startRun(instanceId: String) {
+        // TODO("make sure last run is at least 2 seconds ago and update flag if it is")
+    }
 }

@@ -2,6 +2,7 @@ package com.mcspeedrun.rng.controller
 
 import com.mcspeedrun.rng.model.http.http403
 import com.mcspeedrun.rng.model.http.http500
+import com.mcspeedrun.rng.repository.RegisteredInstancesRepository
 import com.mcspeedrun.rng.service.JWTService
 import com.mcspeedrun.rng.service.RandomSourceService
 import com.mcspeedrun.rng.service.SaltService
@@ -69,13 +70,14 @@ class VerificationController (
     private val jwtService: JWTService,
     private val randomSourceService: RandomSourceService,
     private val saltService: SaltService,
+    private val registeredInstancesRepository: RegisteredInstancesRepository,
 ) {
     @Post("start_run")
     fun startRun(
         @QueryValue("seed") setSeed: String?,
         instance: Principal,
     ): TokenResponse<RunStart> {
-        // TODO("make sure last run is at least 2 seconds ago")
+        registeredInstancesRepository.startRun(instance.name)
 
         val randomSource = randomSourceService.getRandom()
         val runStart = RunStart(
