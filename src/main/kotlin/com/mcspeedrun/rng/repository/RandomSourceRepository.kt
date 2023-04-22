@@ -34,7 +34,7 @@ class RandomSourceRepository (
     }
 
     fun createSource(seed: String, duration: Duration): RandomSource {
-        // TODO: store server instance source was generated on
+        // TODO("store server instance source was generated on")
         val createdAt = LocalDateTime.now(ZoneOffset.UTC)
         val expiresAt = createdAt.plus(duration)
         return jooq

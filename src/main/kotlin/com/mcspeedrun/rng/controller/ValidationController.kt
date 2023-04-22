@@ -26,7 +26,7 @@ class ValidationController (
     fun getRandomSource(
         @QueryValue("sourceTime") sourceTime: LocalDateTime
     ): List<RandomSourceEntry> {
-        // TODO: ability to 1filter by server instance
+        // TODO("ability to 1filter by server instance")
         return randomSourceRepository.findExpiredSource(sourceTime)
     }
 }
