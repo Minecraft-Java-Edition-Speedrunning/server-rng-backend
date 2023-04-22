@@ -1,6 +1,6 @@
 package com.mcspeedrun.rng.repository
 
-import com.mcspeedrun.rng.model.SaltEntry
+import com.mcspeedrun.rng.model.SaltBlockEntry
 import com.mcspeedrun.rng.model.http.http425
 import database.generated.server_rng.Tables.SALT_BLOCK
 import io.micronaut.context.annotation.Property
@@ -29,7 +29,7 @@ class SaltBlockRepository (
     private val saltTTL: Long,
     private val jooq: DSLContext,
 ) {
-    fun findExpiredSalt(time: LocalDateTime): SaltEntry? {
+    fun findExpiredSalt(time: LocalDateTime): SaltBlockEntry? {
         val now = LocalDateTime.now()
         if (time.isBefore(now)) {
             throw http425("can't read archived block from the future")
@@ -45,7 +45,7 @@ class SaltBlockRepository (
             .from(SALT_BLOCK)
             .where(SALT_BLOCK.EXPIRES_AT.lessThan(now))
             .and(DSL.value(time).between(SALT_BLOCK.EXPIRES_AT, SALT_BLOCK.ACTIVE_AT))
-            .fetchOneInto(SaltEntry::class.java)
+            .fetchOneInto(SaltBlockEntry::class.java)
     }
 
     fun findSalt(time: LocalDateTime): ByteArray {

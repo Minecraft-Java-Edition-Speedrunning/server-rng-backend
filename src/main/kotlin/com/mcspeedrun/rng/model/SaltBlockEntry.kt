@@ -2,7 +2,7 @@ package com.mcspeedrun.rng.model
 
 import java.time.LocalDateTime
 
-data class SaltEntry (
+data class SaltBlockEntry (
     val id: String,
     val salt: String,
     val activeAt: LocalDateTime,

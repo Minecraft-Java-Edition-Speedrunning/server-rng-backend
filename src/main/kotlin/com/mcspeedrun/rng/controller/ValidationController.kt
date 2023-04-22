@@ -1,7 +1,7 @@
 package com.mcspeedrun.rng.controller
 
 import com.mcspeedrun.rng.repository.SaltBlockRepository
-import com.mcspeedrun.rng.model.SaltEntry
+import com.mcspeedrun.rng.model.SaltBlockEntry
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.QueryValue
@@ -15,7 +15,7 @@ class ValidationController (
     @Get("salt")
     fun getSaltBlock(
         @QueryValue("blockTime") blockTime: LocalDateTime
-    ): SaltEntry? {
+    ): SaltBlockEntry? {
         return saltBlockRepository.findExpiredSalt(blockTime)
     }
     // TODO("endpoint for getting random source blocks after they have expired")
