@@ -1,7 +1,7 @@
 package com.mcspeedrun.rng.controller
 
 import com.mcspeedrun.rng.repository.SaltBlockRepository
-import com.mcspeedrun.rng.repository.SaltEntry
+import com.mcspeedrun.rng.model.SaltEntry
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.QueryValue

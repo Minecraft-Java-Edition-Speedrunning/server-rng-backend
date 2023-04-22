@@ -1,5 +1,6 @@
 package com.mcspeedrun.rng.repository
 
+import com.mcspeedrun.rng.model.SaltEntry
 import com.mcspeedrun.rng.model.http.http425
 import database.generated.server_rng.Tables.SALT_BLOCK
 import io.micronaut.context.annotation.Property
@@ -21,14 +22,6 @@ private val decoder = Base64.getDecoder()
 private fun LocalDateTime.toEpochMilli(offset: ZoneOffset): Long {
     return this.toInstant(offset).toEpochMilli()
 }
-
-data class SaltEntry (
-    val id: String,
-    val salt: String,
-    val activeAt: LocalDateTime,
-    val expiresAt: LocalDateTime,
-    val createdAt: LocalDateTime,
-)
 
 @Singleton
 class SaltBlockRepository (
