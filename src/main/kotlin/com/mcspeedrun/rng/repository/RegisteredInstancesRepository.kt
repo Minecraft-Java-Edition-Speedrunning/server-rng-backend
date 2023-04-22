@@ -3,6 +3,7 @@ package com.mcspeedrun.rng.repository
 import com.mcspeedrun.rng.model.AuthenticationMethod
 import com.mcspeedrun.rng.model.InstanceRegistration
 import com.mcspeedrun.rng.model.Role
+import com.mcspeedrun.rng.model.http.http425
 import com.mcspeedrun.rng.model.http.http500
 import database.generated.server_rng.Tables.USERS
 import database.generated.server_rng.Tables.REGISTERED_INSTANCES
@@ -94,6 +95,23 @@ class RegisteredInstancesRepository(
     }
 
     fun startRun(instanceId: String) {
-        // TODO("make sure last run is at least 2 seconds ago and update flag if it is")
+        jooq.transactionResult { transaction ->
+            val lastRunAt = transaction.dsl()
+                .select(REGISTERED_INSTANCES.LAST_RUN_AT).from(REGISTERED_INSTANCES)
+                .where(REGISTERED_ROLES.INSTANCE_ID.eq(instanceId))
+                .fetchOne()
+                ?.component1()
+            val now = LocalDateTime.now()
+            // TODO("make the amount of time here configurable")
+            if (lastRunAt?.isBefore(now.minusSeconds(2)) != false) {
+                transaction.dsl()
+                    .update(REGISTERED_INSTANCES)
+                    .set(REGISTERED_INSTANCES.LAST_RUN_AT, now)
+                    .where(REGISTERED_ROLES.INSTANCE_ID.eq(instanceId))
+                    .execute()
+            } else {
+                throw http425("to early to start another run")
+            }
+        }
     }
 }
