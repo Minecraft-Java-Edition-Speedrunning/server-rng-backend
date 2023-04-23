@@ -19,7 +19,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-const val BLOCK_SIZE: Long = 30000
+const val DEFAULT_BLOCK_SIZE: Long = 30000
 
 @Introspected
 data class TokenResponse<T> (
@@ -36,17 +36,18 @@ data class RunStart (
     val randomSourceId: String,
     val runId: String = UUID.randomUUID().toString(),
     val startTime: Instant = Instant.now(),
+    val blockSize: Long,
 )
 @Introspected
 data class RandomBlockForm (
     val runToken: String,
-    val block: Int,
+    val block: Long,
 )
 
 @Introspected
 data class RandomBlock (
     val runId: String,
-    val block: Int,
+    val block: Long,
     val seed: String,
     val hashAlgorithm: String,
 )
@@ -86,6 +87,7 @@ class VerificationController (
             seed = setSeed ?: randomSource.worldSeed,
             randomSalt = randomSource.randomSalt,
             randomSourceId = randomSource.sourceId,
+            blockSize = DEFAULT_BLOCK_SIZE,
         )
 
         return tokenResponse(runStart)
@@ -99,11 +101,11 @@ class VerificationController (
         if (instance.name != run.instance) {
             throw http403("tokens instance does not match current instance")
         }
-        val maxBlock = (Duration.between(run.startTime, Instant.now()).toMillis() / BLOCK_SIZE) + 1
+        val maxBlock = (Duration.between(run.startTime, Instant.now()).toMillis() / run.blockSize) + 1
         if (blockForm.block > maxBlock) {
             throw http403("target block can not be retrieve yet")
         }
-        val blockStartTime = ChronoUnit.MILLIS.addTo(run.startTime, BLOCK_SIZE)
+        val blockStartTime = ChronoUnit.MILLIS.addTo(run.startTime, run.blockSize)
         val randomBlock = RandomBlock(
             runId = run.runId,
             block = blockForm.block,

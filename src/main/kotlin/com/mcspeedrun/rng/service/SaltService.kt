@@ -23,7 +23,7 @@ class SaltService (
         return saltHashAlg
     }
 
-    fun getBlockSeed(blockStartTime: Instant, runSalt: String, block: Int): String {
+    fun getBlockSeed(blockStartTime: Instant, runSalt: String, block: Long): String {
         val globalSalt = getSalt(blockStartTime)
         val digest = MessageDigest.getInstance(saltHashAlg)
         digest.update(globalSalt)
