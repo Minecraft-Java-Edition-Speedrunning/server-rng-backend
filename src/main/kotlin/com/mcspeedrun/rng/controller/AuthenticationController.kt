@@ -2,12 +2,12 @@ package com.mcspeedrun.rng.controller
 
 import com.mcspeedrun.rng.model.AuthenticationMethod
 import com.mcspeedrun.rng.model.YggdrasilRegistration
+import com.mcspeedrun.rng.model.auth.AccessRefreshToken
 import com.mcspeedrun.rng.model.http.http401
 import com.mcspeedrun.rng.service.AuthenticationService
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Post
-import io.micronaut.security.token.jwt.render.AccessRefreshToken
 import javax.annotation.security.PermitAll
 
 
@@ -28,9 +28,10 @@ class AuthenticationController (
     }
 
     @Post("refresh")
-    fun name(
+    fun refreshToken(
         @Body refreshToken: String
     ): AccessRefreshToken {
+        println(refreshToken)
         return authenticationService.refreshInstance(refreshToken)
     }
 }
