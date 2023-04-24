@@ -13,11 +13,6 @@ import org.jooq.DSLContext
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-val INSTANCE_USERS = USERS
-    .join(REGISTERED_INSTANCES)
-    .on(
-        USERS.ID.eq(REGISTERED_INSTANCES.USER_ID)
-    )
 @Singleton
 class RegisteredInstancesRepository(
     private val jooq: DSLContext,
@@ -45,11 +40,26 @@ class RegisteredInstancesRepository(
 
     fun getRegisteredInstances(identifier: Long): List<InstanceRegistration> {
         return jooq
-            .selectFrom(INSTANCE_USERS)
+            .select(
+                REGISTERED_INSTANCES.ID,
+                REGISTERED_INSTANCES.USER_ID,
+                USERS.AUTHENTICATION,
+                REGISTERED_INSTANCES.REFRESH_TOKEN_KEY,
+                REGISTERED_INSTANCES.INVALIDATED,
+                REGISTERED_INSTANCES.REFRESHED_AT,
+                REGISTERED_INSTANCES.CREATED_AT,
+                REGISTERED_INSTANCES.LAST_RUN_AT,
+            )
+            .from(USERS)
+            .join(REGISTERED_INSTANCES)
+            .on(
+                USERS.ID.eq(REGISTERED_INSTANCES.USER_ID)
+            )
             .where(
                 USERS.ID.eq(identifier),
                 REGISTERED_INSTANCES.INVALIDATED.eq(0),
             )
+            .also { println(it.fetch()) }
             .fetchInto(InstanceRegistration::class.java)
     }
 
