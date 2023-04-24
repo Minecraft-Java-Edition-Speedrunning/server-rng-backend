@@ -1,8 +1,7 @@
 package com.mcspeedrun.rng.service
 
-import com.mcspeedrun.rng.model.AuthenticationMethod
 import com.mcspeedrun.rng.model.Access
-import com.mcspeedrun.rng.model.YggdrasilRegistration
+import com.mcspeedrun.rng.model.AuthenticationMethod
 import com.mcspeedrun.rng.model.auth.AccessRefreshToken
 import com.mcspeedrun.rng.model.http.http401
 import com.mcspeedrun.rng.model.http.http429
@@ -17,6 +16,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
+
 @Singleton
 class AuthenticationService(
     @Property(name = "\${micronaut.application.credentialLimit}", defaultValue = "20")
@@ -26,12 +26,6 @@ class AuthenticationService(
     private val refreshTokenGenerator: RefreshTokenGenerator,
     private val refreshTokenValidator: RefreshTokenValidator,
 ) {
-    @Suppress("FunctionOnlyReturningConstant", "UnusedPrivateMember", "ForbiddenComment")
-    fun validateYggdrasil(request: YggdrasilRegistration): Boolean {
-//        TODO("validate yggdrasil login request")
-        return true
-    }
-
     private fun getUserIdentifier(method: AuthenticationMethod, userId: String): Long {
         return repository.getUserIdentifier(method, userId)?.also { identifier ->
             val registeredInstances = repository.getRegisteredInstances(identifier)

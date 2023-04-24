@@ -5,6 +5,7 @@ import com.mcspeedrun.rng.model.YggdrasilRegistration
 import com.mcspeedrun.rng.model.auth.AccessRefreshToken
 import com.mcspeedrun.rng.model.http.http401
 import com.mcspeedrun.rng.service.AuthenticationService
+import com.mcspeedrun.rng.service.YggdrasilService
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Post
@@ -16,12 +17,13 @@ import javax.annotation.security.PermitAll
 @Suppress("Unused")
 class AuthenticationController (
     private val authenticationService: AuthenticationService,
+    private val yggdrasilService: YggdrasilService,
 ) {
     @Post("yggdrasil")
     fun registerYggdrasil(
         @Body yggdrasilPayload: YggdrasilRegistration,
     ): AccessRefreshToken {
-        if (authenticationService.validateYggdrasil(yggdrasilPayload)) {
+        if (yggdrasilService.validate(yggdrasilPayload)) {
             return authenticationService.registerInstance(AuthenticationMethod.YGGDRASIL, yggdrasilPayload.uuid)
         }
         throw http401("unable to authenticate with server")
