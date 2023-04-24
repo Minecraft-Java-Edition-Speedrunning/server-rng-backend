@@ -6,8 +6,8 @@ import io.micronaut.core.annotation.Introspected
 data class YggdrasilRegistration (
     val uuid: String,
     val publicKey: String,
-    val keyExpiration: Long,
-    val keySignature: String,
+    val publicKeyExpiration: Long,
+    val publicKeySignature: String,
     val challenge: String,
     val challengeExpiration: Long,
     val challengeSignature: String,

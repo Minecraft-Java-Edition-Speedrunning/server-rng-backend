@@ -28,7 +28,7 @@ class YggdrasilService {
     ): Boolean {
         val publicKeyBytes = decoder.decode(request.publicKey)
         val challengeBytes = decoder.decode(request.challenge)
-        val keySignatureBytes = decoder.decode(request.keySignature)
+        val keySignatureBytes = decoder.decode(request.publicKeySignature)
         val challengeSignatureBytes = decoder.decode(request.challengeSignature)
 
         val uuid = UUID.fromString(request.uuid)
@@ -40,7 +40,7 @@ class YggdrasilService {
         val isKeyOwner = validateKeyOwner(
             uuidBytes,
             publicKeyBytes,
-            request.keyExpiration,
+            request.publicKeyExpiration,
             keySignatureBytes,
         )
         if (!isKeyOwner) {
