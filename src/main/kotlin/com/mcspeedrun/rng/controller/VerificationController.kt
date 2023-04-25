@@ -38,9 +38,14 @@ data class RunStart (
     val startTime: Instant = Instant.now(),
     val blockSize: Long,
 )
+
+@Introspected
+data class RunForm<T> (
+    val runToken: String,
+    val data: T,
+)
 @Introspected
 data class RandomBlockForm (
-    val runToken: String,
     val block: Long,
 )
 
@@ -54,13 +59,15 @@ data class RandomBlock (
 
 @Introspected
 data class TimeboxForm (
-    val runToken: String,
+    val hash: String,
     val cause: String,
 )
 
 @Introspected
 data class Timebox (
     val runId: String,
+    val hash: String,
+    val cause: String,
     val time: Instant = Instant.now(),
 )
 
@@ -95,21 +102,21 @@ class VerificationController (
     @Post("get_random")
     fun getRandom(
         instance: Principal,
-        @Body blockForm: RandomBlockForm,
+        @Body blockForm: RunForm<RandomBlockForm>,
     ): TokenResponse<RandomBlock> {
         val run: RunStart = jwtService.validate(blockForm.runToken) ?: throw http500("unable to parse token")
         if (instance.name != run.instance) {
             throw http403("tokens instance does not match current instance")
         }
         val maxBlock = (Duration.between(run.startTime, Instant.now()).toMillis() / run.blockSize) + 1
-        if (blockForm.block > maxBlock) {
+        if (blockForm.data.block > maxBlock) {
             throw http403("target block can not be retrieve yet")
         }
         val blockStartTime = ChronoUnit.MILLIS.addTo(run.startTime, run.blockSize)
         val randomBlock = RandomBlock(
             runId = run.runId,
-            block = blockForm.block,
-            seed = saltService.getBlockSeed(blockStartTime, runSalt = run.randomSalt, blockForm.block),
+            block = blockForm.data.block,
+            seed = saltService.getBlockSeed(blockStartTime, runSalt = run.randomSalt, blockForm.data.block),
             hashAlgorithm = saltService.getHashAlg(),
         )
         return tokenResponse(randomBlock)
@@ -117,7 +124,7 @@ class VerificationController (
     @Post("timebox_run")
     fun timeboxRun(
         instance: Principal,
-        @Body timeboxForm: TimeboxForm,
+        @Body timeboxForm: RunForm<TimeboxForm>,
     ): TokenResponse<Timebox> {
         val run: RunStart = jwtService.validate(timeboxForm.runToken) ?: throw http500("unable to parse token")
         if (instance.name != run.instance) {
@@ -125,6 +132,8 @@ class VerificationController (
         }
         val timebox = Timebox(
             runId = run.runId,
+            hash = timeboxForm.data.hash,
+            cause = timeboxForm.data.cause,
         )
         return tokenResponse(timebox)
     }
