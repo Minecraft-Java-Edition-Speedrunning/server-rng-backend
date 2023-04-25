@@ -1,7 +1,8 @@
 package com.mcspeedrun.rng.service
 
-import com.mcspeedrun.rng.model.YggdrasilRegistration
+import com.mcspeedrun.rng.model.auth.YggdrasilRegistration
 import com.mcspeedrun.rng.model.http.http403
+import jakarta.inject.Singleton
 import java.nio.ByteBuffer
 import java.security.KeyFactory
 import java.security.Signature
@@ -9,6 +10,7 @@ import java.security.spec.X509EncodedKeySpec
 import java.time.Instant
 import java.util.*
 
+@Singleton
 class YggdrasilService {
     private val decoder = Base64.getDecoder()
 

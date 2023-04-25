@@ -37,6 +37,8 @@ class RandomSourceRepository (
         // TODO("store server instance source was generated on")
         val createdAt = LocalDateTime.now(ZoneOffset.UTC)
         val expiresAt = createdAt.plus(duration)
+        println(seed)
+        println(seed.length)
         return jooq
             .insertInto(RANDOM_SOURCE, RANDOM_SOURCE.SEED, RANDOM_SOURCE.CREATED_AT, RANDOM_SOURCE.EXPIRES_AT)
             .values(
@@ -44,7 +46,8 @@ class RandomSourceRepository (
                 createdAt,
                 expiresAt,
             )
-            .returning()
+            .returning(RANDOM_SOURCE.ID, RANDOM_SOURCE.SEED, RANDOM_SOURCE.CREATED_AT, RANDOM_SOURCE.EXPIRES_AT)
+            .also { println(it.fetch()) }
             .fetchInto(RandomSource::class.java)
             .first()
     }

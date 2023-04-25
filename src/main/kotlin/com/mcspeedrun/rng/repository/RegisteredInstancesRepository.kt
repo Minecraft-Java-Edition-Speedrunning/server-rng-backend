@@ -87,7 +87,8 @@ class RegisteredInstancesRepository(
             .select(REGISTERED_INSTANCES.ID)
             .from(REGISTERED_INSTANCES)
             .where(REGISTERED_INSTANCES.REFRESH_TOKEN_KEY.eq(refreshTokenKey))
-            .fetchOne()?.component1()
+            .fetchOne()
+            ?.component1()
     }
 
     fun getAccess(instanceId: String): List<Access> {
@@ -121,8 +122,9 @@ class RegisteredInstancesRepository(
     fun startRun(instanceId: String) {
         jooq.transactionResult { transaction ->
             val lastRunAt = transaction.dsl()
-                .select(REGISTERED_INSTANCES.LAST_RUN_AT).from(REGISTERED_INSTANCES)
-                .where(REGISTERED_ACCESS.INSTANCE_ID.eq(instanceId))
+                .select(REGISTERED_INSTANCES.LAST_RUN_AT)
+                .from(REGISTERED_INSTANCES)
+                .where(REGISTERED_INSTANCES.ID.eq(instanceId))
                 .fetchOne()
                 ?.component1()
             val now = LocalDateTime.now()
@@ -131,7 +133,7 @@ class RegisteredInstancesRepository(
                 transaction.dsl()
                     .update(REGISTERED_INSTANCES)
                     .set(REGISTERED_INSTANCES.LAST_RUN_AT, now)
-                    .where(REGISTERED_ACCESS.INSTANCE_ID.eq(instanceId))
+                    .where(REGISTERED_INSTANCES.ID.eq(instanceId))
                     .execute()
             } else {
                 throw http425("to early to start another run")

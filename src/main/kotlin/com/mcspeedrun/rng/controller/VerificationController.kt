@@ -33,7 +33,7 @@ data class RunStart (
     val isSetSeed: Boolean,
     val seed: String,
     val randomSalt: String,
-    val randomSourceId: String,
+    val randomSourceId: Long,
     val runId: String = UUID.randomUUID().toString(),
     val startTime: Instant = Instant.now(),
     val blockSize: Long,

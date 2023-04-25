@@ -1,4 +1,4 @@
-package com.mcspeedrun.rng.model
+package com.mcspeedrun.rng.model.auth
 
 import io.micronaut.core.annotation.Introspected
 

@@ -1,7 +1,7 @@
 package com.mcspeedrun.rng.controller
 
 import com.mcspeedrun.rng.model.AuthenticationMethod
-import com.mcspeedrun.rng.model.YggdrasilRegistration
+import com.mcspeedrun.rng.model.auth.YggdrasilRegistration
 import com.mcspeedrun.rng.model.auth.AccessRefreshToken
 import com.mcspeedrun.rng.model.http.http401
 import com.mcspeedrun.rng.service.AuthenticationService

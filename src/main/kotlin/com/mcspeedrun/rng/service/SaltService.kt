@@ -27,7 +27,7 @@ class SaltService (
         val globalSalt = getSalt(blockStartTime)
         val digest = MessageDigest.getInstance(saltHashAlg)
         digest.update(globalSalt)
-        digest.update(runSalt.toByte())
+        digest.update(runSalt.encodeToByteArray())
         digest.update(block.toByte())
 
         return String(Base64.getEncoder().encode(digest.digest()))

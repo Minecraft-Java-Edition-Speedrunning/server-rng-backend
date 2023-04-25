@@ -7,10 +7,10 @@ import java.util.*
 private val decoder = Base64.getDecoder()
 
 data class RandomSource (
-    val sourceId: String,
+    val sourceId: Long,
     private val seed: String,
-    val expiresAt: LocalDateTime,
     val createdAt: LocalDateTime,
+    val expiresAt: LocalDateTime,
 ) {
     var uses: Int = 0
     var source: SecureRandom = SecureRandom.getInstance("SHA1PRNG").also{ it.setSeed(decoder.decode(seed)) }

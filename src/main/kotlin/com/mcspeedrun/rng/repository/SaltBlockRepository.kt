@@ -45,7 +45,7 @@ class SaltBlockRepository (
             .from(SALT_BLOCK)
             .where(SALT_BLOCK.EXPIRES_AT.lessThan(now))
             .and(DSL.value(time).between(SALT_BLOCK.EXPIRES_AT, SALT_BLOCK.ACTIVE_AT))
-            .fetchOneInto(SaltBlockEntry::class.java)
+            .fetchAnyInto(SaltBlockEntry::class.java)
     }
 
     fun findSalt(time: LocalDateTime): ByteArray {
@@ -53,8 +53,8 @@ class SaltBlockRepository (
             transaction.dsl()
                 .select(SALT_BLOCK.SALT)
                 .from(SALT_BLOCK)
-                .where(DSL.value(time).between(SALT_BLOCK.EXPIRES_AT, SALT_BLOCK.ACTIVE_AT))
-                .fetchOne()
+                .where(DSL.value(time).between(SALT_BLOCK.ACTIVE_AT, SALT_BLOCK.EXPIRES_AT))
+                .fetchAny()
                 ?.component1()
                 ?.let { decoder.decode(it) }?: createSalt(transaction, time)
         }
@@ -66,14 +66,14 @@ class SaltBlockRepository (
             .from(SALT_BLOCK)
             .where(SALT_BLOCK.ACTIVE_AT.lessThan(time))
             .orderBy(SALT_BLOCK.ACTIVE_AT.desc())
-            .fetchOne()
+            .fetchAny()
             ?.component1()
         val nextBlockStart = transaction.dsl()
             .select(SALT_BLOCK.ACTIVE_AT)
             .from(SALT_BLOCK)
             .where(SALT_BLOCK.EXPIRES_AT.greaterThan(time))
-            .orderBy(SALT_BLOCK.ACTIVE_AT.asc())
-            .fetchOne()
+            .orderBy(SALT_BLOCK.EXPIRES_AT.asc())
+            .fetchAny()
             ?.component1()
 
         val blockStart = lastBlockEnd?.let {
