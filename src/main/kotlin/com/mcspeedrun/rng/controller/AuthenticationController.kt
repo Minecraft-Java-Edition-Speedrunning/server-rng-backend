@@ -6,6 +6,7 @@ import com.mcspeedrun.rng.model.auth.AccessRefreshToken
 import com.mcspeedrun.rng.model.http.http401
 import com.mcspeedrun.rng.service.AuthenticationService
 import com.mcspeedrun.rng.service.YggdrasilService
+import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Post
@@ -29,11 +30,10 @@ class AuthenticationController (
         throw http401("unable to authenticate with server")
     }
 
-    @Post("refresh")
+    @Post("refresh", consumes = [MediaType.TEXT_PLAIN])
     fun refreshToken(
         @Body refreshToken: String
     ): AccessRefreshToken {
-        println(refreshToken)
         return authenticationService.refreshInstance(refreshToken)
     }
 }

@@ -35,7 +35,7 @@ data class RunStart (
     val randomSalt: String,
     val randomSourceId: Long,
     val runId: String = UUID.randomUUID().toString(),
-    val startTime: Instant = Instant.now(),
+    val startTime: Long = Instant.now().toEpochMilli(),
     val blockSize: Long,
 )
 
@@ -68,7 +68,7 @@ data class Timebox (
     val runId: String,
     val hash: String,
     val cause: String,
-    val time: Instant = Instant.now(),
+    val time: Long = Instant.now().toEpochMilli(),
 )
 
 @Suppress("Unused")
@@ -105,14 +105,15 @@ class VerificationController (
         @Body blockForm: RunForm<RandomBlockForm>,
     ): TokenResponse<RandomBlock> {
         val run: RunStart = jwtService.validate(blockForm.runToken) ?: throw http500("unable to parse token")
+        val startTime = Instant.ofEpochMilli(run.startTime)
         if (instance.name != run.instance) {
             throw http403("tokens instance does not match current instance")
         }
-        val maxBlock = (Duration.between(run.startTime, Instant.now()).toMillis() / run.blockSize) + 1
+        val maxBlock = (Duration.between(startTime, Instant.now()).toMillis() / run.blockSize) + 1
         if (blockForm.data.block > maxBlock) {
             throw http403("target block can not be retrieve yet")
         }
-        val blockStartTime = ChronoUnit.MILLIS.addTo(run.startTime, run.blockSize)
+        val blockStartTime = ChronoUnit.MILLIS.addTo(startTime, run.blockSize)
         val randomBlock = RandomBlock(
             runId = run.runId,
             block = blockForm.data.block,

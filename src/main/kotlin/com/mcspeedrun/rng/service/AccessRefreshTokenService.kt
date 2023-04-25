@@ -33,7 +33,7 @@ class AccessRefreshTokenService (
     ): AccessRefreshToken? {
         val expiresIn = accessTokenConfiguration.expiration
         val now = Instant.now()
-        val expiresAt = now.plus(expiresIn.toLong(), ChronoUnit.SECONDS)
+        val expiresAt = now.plus(expiresIn.toLong(), ChronoUnit.MILLIS)
         val builder = JWTClaimsSet.Builder()
         builder.issueTime(Date.from(now))
         builder.notBeforeTime(Date.from(now))
@@ -60,6 +60,6 @@ class AccessRefreshTokenService (
         builder.claim(rolesKey, authentication.roles)
         val accessToken = tokenGenerator.generateToken(builder.build().claims)
             .takeIf { it.isPresent }?.get() ?: return null
-        return AccessRefreshToken(refreshToken, accessToken, expiresAt)
+        return AccessRefreshToken(refreshToken, accessToken, expiresAt.toEpochMilli())
     }
 }

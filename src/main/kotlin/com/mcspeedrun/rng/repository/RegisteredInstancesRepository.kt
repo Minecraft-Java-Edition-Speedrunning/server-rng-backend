@@ -57,9 +57,10 @@ class RegisteredInstancesRepository(
             )
             .where(
                 USERS.ID.eq(identifier),
+            )
+            .and(
                 REGISTERED_INSTANCES.INVALIDATED.eq(0),
             )
-            .also { println(it.fetch()) }
             .fetchInto(InstanceRegistration::class.java)
     }
 

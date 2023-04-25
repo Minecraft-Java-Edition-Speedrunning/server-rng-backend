@@ -69,8 +69,9 @@ class AuthenticationService(
         val newRefreshToken =refreshTokenGenerator.generate(authentication, newRefreshTokenKey)
             .takeIf { it.isPresent }?.get() ?: throw http500("unable to generate refresh token")
 
-        repository.refreshInstance(instanceId, newRefreshTokenKey)
-        return tokenGenerator.generate(newRefreshToken, authentication)
+        val accessRefreshToken = tokenGenerator.generate(newRefreshToken, authentication)
             ?: throw http500("unable to generate access token")
+        repository.refreshInstance(instanceId, newRefreshTokenKey)
+        return accessRefreshToken
     }
 }
